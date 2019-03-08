@@ -13,10 +13,15 @@ from __future__ import print_function
 __sets = {}
 from datasets.pascal_voc import pascal_voc
 from datasets.coco import coco
+from datasets.abbdoc import abbdoc
 from datasets.imagenet import imagenet
 from datasets.vg import vg
 
 import numpy as np
+
+for split in ['training', 'validation']:
+  name = 'abbdoc_{}'.format(split)
+  __sets[name] = (lambda split=split: abbdoc(split))
 
 # Set up voc_<year>_<split>
 for year in ['2007', '2012']:

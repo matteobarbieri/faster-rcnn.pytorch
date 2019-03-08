@@ -54,7 +54,7 @@ def parse_args():
                       help='number of iterations to display',
                       default=100, type=int)
   parser.add_argument('--checkpoint_interval', dest='checkpoint_interval',
-                      help='number of iterations to display',
+                      help='Save the model every N iterations',
                       default=10000, type=int)
 
   parser.add_argument('--save_dir', dest='save_dir',
@@ -164,6 +164,16 @@ if __name__ == '__main__':
       args.imdb_name = "coco_2014_train+coco_2014_valminusminival"
       args.imdbval_name = "coco_2014_minival"
       args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
+  elif args.dataset == "abbdoc":
+      args.imdb_name = "abbdoc_training"
+      args.imdbval_name = "abbdoc_validation"
+      args.set_cfgs = [
+              'ANCHOR_SCALES', '[4, 8, 16, 32]', 
+              'ANCHOR_RATIOS', '[0.5,1,2]', 
+              'MAX_NUM_GT_BOXES', '50', 
+              'DATA_DIR', '/mnt/data/datasets/synth_diagrams',
+              'TRAIN.USE_FLIPPED', 'False'
+      ]
   elif args.dataset == "imagenet":
       args.imdb_name = "imagenet_train"
       args.imdbval_name = "imagenet_val"
@@ -192,7 +202,7 @@ if __name__ == '__main__':
 
   # train set
   # -- Note: Use validation set and disable the flipped to enable faster loading.
-  cfg.TRAIN.USE_FLIPPED = True
+  # cfg.TRAIN.USE_FLIPPED = True
   cfg.USE_GPU_NMS = args.cuda
   imdb, roidb, ratio_list, ratio_index = combined_roidb(args.imdb_name)
   train_size = len(roidb)
@@ -367,7 +377,19 @@ if __name__ == '__main__':
 
         loss_temp = 0
         start = time.time()
-
+        
+        # Save the model every
+        if step%args.checkpoint_interval == 0 and step > 0:
+            save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}_{}.pth'.format(args.session, epoch, step))
+            save_checkpoint({
+              'session': args.session,
+              'epoch': epoch + 1,
+              'model': fasterRCNN.module.state_dict() if args.mGPUs else fasterRCNN.state_dict(),
+              'optimizer': optimizer.state_dict(),
+              'pooling_mode': cfg.POOLING_MODE,
+              'class_agnostic': args.class_agnostic,
+            }, save_name)
+            print('save model: {}'.format(save_name))
     
     save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}_{}.pth'.format(args.session, epoch, step))
     save_checkpoint({

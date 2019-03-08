@@ -10,6 +10,8 @@ from datasets.factory import get_imdb
 import PIL
 import pdb
 
+from tqdm import tqdm
+
 def prepare_roidb(imdb):
   """Enrich the imdb's roidb by adding some derived quantities that
   are useful for training. This function precomputes the maximum
@@ -19,14 +21,18 @@ def prepare_roidb(imdb):
   """
 
   roidb = imdb.roidb
-  if not (imdb.name.startswith('coco')):
+  # if not (imdb.name.startswith('coco')):
+  if not (imdb.name.startswith('coco') or imdb.name.startswith('abbdoc')):
     sizes = [PIL.Image.open(imdb.image_path_at(i)).size
          for i in range(imdb.num_images)]
-         
-  for i in range(len(imdb.image_index)):
+
+  print("Len: {}".format(len(imdb.image_index)))
+
+  for i in tqdm(range(len(imdb.image_index))):
     roidb[i]['img_id'] = imdb.image_id_at(i)
     roidb[i]['image'] = imdb.image_path_at(i)
-    if not (imdb.name.startswith('coco')):
+    # if not (imdb.name.startswith('coco')):
+    if not (imdb.name.startswith('coco') or imdb.name.startswith('abbdoc')):
       roidb[i]['width'] = sizes[i][0]
       roidb[i]['height'] = sizes[i][1]
     # need gt_overlaps as a dense array for argmax
