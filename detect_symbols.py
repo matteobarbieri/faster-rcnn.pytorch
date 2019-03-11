@@ -186,8 +186,7 @@ if __name__ == '__main__':
   # pascal_classes = notation2tables[args.dataset]
   with open(os.environ['NAMES_FILE'], 'r') as nf:
     pascal_classes = np.asarray(
-            # ["__background__"] + nf.readlines()
-            nf.readlines()
+            ["__background__"] + nf.readlines() # XXX this is needed!
     )
 
   # initilize the network here.
