@@ -14,6 +14,7 @@ __sets = {}
 from datasets.pascal_voc import pascal_voc
 from datasets.coco import coco
 from datasets.abbdoc import abbdoc
+from datasets.siemenssimaris import siemenssimaris
 from datasets.imagenet import imagenet
 from datasets.vg import vg
 
@@ -22,6 +23,8 @@ import numpy as np
 for split in ['training', 'validation']:
   name = 'abbdoc_{}'.format(split)
   __sets[name] = (lambda split=split: abbdoc(split))
+  name = 'siemenssimaris_{}'.format(split)
+  __sets[name] = (lambda split=split: siemenssimaris(split))
 
 # Set up voc_<year>_<split>
 for year in ['2007', '2012']:

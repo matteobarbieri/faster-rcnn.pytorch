@@ -164,9 +164,10 @@ if __name__ == '__main__':
       args.imdb_name = "coco_2014_train+coco_2014_valminusminival"
       args.imdbval_name = "coco_2014_minival"
       args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
-  elif args.dataset == "abbdoc":
-      args.imdb_name = "abbdoc_training"
-      args.imdbval_name = "abbdoc_validation"
+  # elif args.dataset == "abbdoc":
+  elif args.dataset in ["abbdoc", "siemenssimaris"]:
+      args.imdb_name = "{}_training".format(args.dataset)
+      args.imdbval_name = "{}_validation".format(args.dataset)
       args.set_cfgs = [
               'ANCHOR_SCALES', '[4, 8, 16, 32]', 
               'ANCHOR_RATIOS', '[0.5,1,2]', 
