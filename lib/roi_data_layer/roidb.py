@@ -22,7 +22,13 @@ def prepare_roidb(imdb):
 
   roidb = imdb.roidb
   # if not (imdb.name.startswith('coco')):
-  if not (imdb.name.startswith('coco') or imdb.name.startswith('abbdoc')):
+  # if not (imdb.name.startswith('coco') or imdb.name.startswith('abbdoc')):
+  if not (
+      imdb.name.startswith('coco') or \
+      imdb.name.startswith('abbdoc') or \
+      imdb.name.startswith('siemenssimaris') or \
+      imdb.name.startswith('schneider')
+      ):
     sizes = [PIL.Image.open(imdb.image_path_at(i)).size
          for i in range(imdb.num_images)]
 
@@ -32,7 +38,13 @@ def prepare_roidb(imdb):
     roidb[i]['img_id'] = imdb.image_id_at(i)
     roidb[i]['image'] = imdb.image_path_at(i)
     # if not (imdb.name.startswith('coco')):
-    if not (imdb.name.startswith('coco') or imdb.name.startswith('abbdoc')):
+    # if not (imdb.name.startswith('coco') or imdb.name.startswith('abbdoc')):
+    if not (
+        imdb.name.startswith('coco') or \
+        imdb.name.startswith('abbdoc') or \
+        imdb.name.startswith('siemenssimaris') or \
+        imdb.name.startswith('schneider')
+        ):
       roidb[i]['width'] = sizes[i][0]
       roidb[i]['height'] = sizes[i][1]
     # need gt_overlaps as a dense array for argmax
