@@ -183,8 +183,15 @@ if __name__ == '__main__':
           'faster_rcnn_{}.pth'.format(args.dataset)
   )
 
+  # names_file_path = os.environ['NAMES_FILE']
+  names_file_path = os.path.join(
+          input_dir,
+          'names_{}.txt'.format(args.dataset)
+  )
+
   # pascal_classes = notation2tables[args.dataset]
-  with open(os.environ['NAMES_FILE'], 'r') as nf:
+  # with open(os.environ['NAMES_FILE'], 'r') as nf:
+  with open(names_file_path, 'r') as nf:
     pascal_classes = np.asarray(
             ["__background__"] + nf.readlines() # XXX this is needed!
     )
