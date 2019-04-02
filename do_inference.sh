@@ -13,9 +13,7 @@ BS=2
 #CHECKPOINT=$4
 #CHECKPOINT=${4:=40000}
 
-# TODO change these values!
-#LOAD_DIR=${2:="/mnt/data/working_folder/ABB/models"}
-LOAD_DIR="/mnt/data/working_folder/ABB/models"
+LOAD_DIR=$FASTERRCNN_MODELS_DIR
 
 #python demo_abbdoc.py \
 python detect_symbols.py \
