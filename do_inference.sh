@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 # Command line arguments
 IMAGE_DIR=$1
