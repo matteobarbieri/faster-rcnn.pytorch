@@ -241,6 +241,9 @@ if __name__ == '__main__':
   num_boxes = Variable(num_boxes)
   gt_boxes = Variable(gt_boxes)
 
+  # Set num threads?
+  torch.set_num_threads(4)
+
   if args.cuda:
     cfg.CUDA = True
 
