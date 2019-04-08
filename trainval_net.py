@@ -116,6 +116,9 @@ def parse_args():
                       help='whether use tensorboard',
                       action='store_true')
 
+  parser.add_argument('--tfb_logs', type=str,
+                      help='Folder where to save tb logs', default='logs')
+
   args = parser.parse_args()
   return args
 
@@ -307,7 +310,8 @@ if __name__ == '__main__':
 
   if args.use_tfboard:
     from tensorboardX import SummaryWriter
-    logger = SummaryWriter("logs")
+    # logger = SummaryWriter("logs")
+    logger = SummaryWriter(args.tfb_logs)
 
   for epoch in range(args.start_epoch, args.max_epochs + 1):
     # setting to train mode
