@@ -16,6 +16,12 @@ BS=2
 # Arguments
 SAVE_DIR=$2
 
+TFB_LOGS=$3
+
+if [ "$TFB_LOGS" = "" ]; then
+	TFB_LOGS=/tmp/logs/$DATASET/`date "+%Y%m%d_%H%M"`
+fi
+
 python trainval_net.py \
 	--dataset $DATASET \
 	--net $NET \
@@ -24,4 +30,5 @@ python trainval_net.py \
 	--save_dir $SAVE_DIR \
 	--epochs $MAX_EPOCHS \
 	--use_tfb \
+	--tfb_logs $TFB_LOGS \
 	--cuda

@@ -23,4 +23,5 @@ python detect_symbols.py \
 	--load_dir $LOAD_DIR \
 	--image_dir $IMAGE_DIR \
 	--cuda \
-	--set ANCHOR_SCALES "[4,8,16,32]"
+	--cfg cfgs/res101.yml \
+	--set ANCHOR_SCALES "[0.14, 0.35, 0.67, 1.19, 2.4]"

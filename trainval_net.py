@@ -171,8 +171,14 @@ if __name__ == '__main__':
   elif args.dataset in ["abbdoc", "siemenssimaris", "schneiderelectricecodial"]:
       args.imdb_name = "{}_training".format(args.dataset)
       args.imdbval_name = "{}_validation".format(args.dataset)
+
+      # array([[0.13691489],
+       # [0.66514403],
+       # [0.34580242],
+       # [1.18588261]])
       args.set_cfgs = [
-              'ANCHOR_SCALES', '[4, 8, 16, 32]', 
+              # 'ANCHOR_SCALES', '[4, 8, 16, 32]', 
+              'ANCHOR_SCALES', '[0.14, 0.35, 0.67, 1.19, 2.4]', 
               'ANCHOR_RATIOS', '[0.5,1,2]', 
               'MAX_NUM_GT_BOXES', '50', 
               'DATA_DIR', '/mnt/data/datasets/synth_diagrams',
