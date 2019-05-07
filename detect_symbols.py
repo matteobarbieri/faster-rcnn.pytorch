@@ -105,6 +105,15 @@ def parse_args():
                       help='Threshold value for confidence',
                       default=0.75, type=float)
 
+  # Stupid GPU parallelization
+  parser.add_argument('--mod_N',
+                      help='Filter images, only process a part of them',
+                      default=-1, type=int)
+
+  parser.add_argument('--mod_filter',
+                      help='Filter images, only process a part of them',
+                      default=-1, type=int)
+
   args = parser.parse_args()
   return args
 
@@ -273,8 +282,16 @@ if __name__ == '__main__':
   # while (num_images >= 0):
   while num_images > 0 or webcam_num > -1:
       total_tic = time.time()
+
       if webcam_num == -1:
         num_images -= 1
+
+      if (
+          args.mod_N > 0 and \
+          (num_images % args.mod_N) != args.mod_filter):
+
+          # Only process those assigned to this "batch"
+          continue
 
       # Save detections in a list
       detections = list()
@@ -369,7 +386,7 @@ if __name__ == '__main__':
               cls_boxes = pred_boxes[inds, :]
             else:
               cls_boxes = pred_boxes[inds][:, j * 4:(j + 1) * 4]
-            
+
             cls_dets = torch.cat((cls_boxes, cls_scores.unsqueeze(1)), 1)
             # cls_dets = torch.cat((cls_boxes, cls_scores), 1)
             cls_dets = cls_dets[order]
@@ -406,7 +423,7 @@ if __name__ == '__main__':
       with open(pkl_path, 'wb') as pf:
           pkl.dump(detections, pf)
 
-      if vis: 
+      if vis:
           # cv2.imshow('test', im2show)
           # cv2.waitKey(0)
           result_path = os.path.join(args.image_dir, imglist[num_images][:-4] + "_det.jpg")
