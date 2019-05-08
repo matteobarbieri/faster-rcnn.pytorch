@@ -268,13 +268,11 @@ if __name__ == '__main__':
   # vis = args.vis
 
   webcam_num = args.webcam_num
-  # Set up webcam or get image directories
-  if webcam_num >= 0 :
-    cap = cv2.VideoCapture(webcam_num)
-    num_images = 0
-  else:
-    imglist = os.listdir(args.image_dir)
-    num_images = len(imglist)
+
+  # Only load images, no pkl
+  # TODO also possibly skip detections (they end with "_det.jpg")
+  imglist = [x for x in os.listdir(args.image_dir) if x.endswith(".png")]
+  num_images = len(imglist)
 
   print('Loaded Photo: {} images.'.format(num_images))
 
@@ -296,17 +294,10 @@ if __name__ == '__main__':
       # Save detections in a list
       detections = list()
 
-      # Get image from the webcam
-      if webcam_num >= 0:
-        if not cap.isOpened():
-          raise RuntimeError("Webcam could not open. Please check connection.")
-        ret, frame = cap.read()
-        im_in = np.array(frame)
-      # Load the demo image
-      else:
-        im_file = os.path.join(args.image_dir, imglist[num_images])
-        # im = cv2.imread(im_file)
-        im_in = np.array(imread(im_file))
+      im_file = os.path.join(args.image_dir, imglist[num_images])
+      # im = cv2.imread(im_file)
+      im_in = np.array(imread(im_file))
+
       if len(im_in.shape) == 2:
         im_in = im_in[:,:,np.newaxis]
         im_in = np.concatenate((im_in,im_in,im_in), axis=2)
@@ -437,7 +428,3 @@ if __name__ == '__main__':
           print('Frame rate:', frame_rate)
           if cv2.waitKey(1) & 0xFF == ord('q'):
               break
-
-  if webcam_num >= 0:
-      cap.release()
-      cv2.destroyAllWindows()
