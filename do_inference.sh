@@ -4,6 +4,10 @@
 IMAGE_DIR=$1
 NOTATION=$2
 
+# Arguments for parallelization
+MOD_N=$3
+MOD_FILTER=$4
+
 #SESSION=1
 NET=res101
 #DATASET=abbdoc
