@@ -2,6 +2,12 @@
 
 # Trains 
 
+if [ "$1" = "-h" ]; then
+	echo -e "Usage:\n"
+	echo -e "/do_training.sh NOTATION SAVE_DIR"
+	exit 0
+fi
+
 # Dataset and net used
 #DATASET=abbdoc
 DATASET=$1
