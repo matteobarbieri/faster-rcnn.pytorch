@@ -12,8 +12,76 @@ import torch
 from model.utils.config import cfg
 from roi_data_layer.minibatch import get_minibatch
 
+from scipy.misc import imsave
+
+from torchvision.transforms import ColorJitter
+from PIL import ImageDraw, Image, ImageEnhance
+
 import numpy as np
 
+import os
+import cv2
+
+
+def _apply_sp(img, amount, point_size=1, s_vs_p=0.2, salt_color=255, pepper_color=0):
+    noisy = np.copy(img)
+    point_size = max(1, point_size)
+    rectangle = np.ones(shape=(point_size, point_size))
+    rect_idx = [axis_idx - int(point_size / 2) for axis_idx in np.where(rectangle)]
+
+    # Salt mode
+    num_salt = np.ceil(amount * np.prod(img.shape[:2]) * s_vs_p)
+    coords = [np.random.randint(0, i - 1, int(num_salt)) for i in img.shape[:2]]
+    coords = [np.clip(c[:, None] + r, 0, d - 1).reshape(-1) for c, d, r in zip(coords, img.shape[:2], rect_idx)]
+    noisy[tuple(coords)] = salt_color
+
+    # Pepper mode
+    num_pepper = np.ceil(amount * np.prod(img.shape[:2]) * (1. - s_vs_p))
+    coords = [np.random.randint(0, i - 1, int(num_pepper)) for i in img.shape[:2]]
+    coords = [np.clip(c[:, None] + r, 0, d - 1).reshape(-1) for c, d, r in zip(coords, img.shape[:2], rect_idx)]
+    noisy[tuple(coords)] = pepper_color
+
+    return noisy
+
+
+# def noisy(noise_typ,image):
+   # if noise_typ == "gauss":
+      # row,col,ch= image.shape
+      # mean = 0
+      # var = 0.1
+      # sigma = var**0.5
+      # gauss = np.random.normal(mean,sigma,(row,col,ch))
+      # gauss = gauss.reshape(row,col,ch)
+      # noisy = image + gauss
+      # return noisy
+   # elif noise_typ == "s&p":
+      # row,col,ch = image.shape
+      # s_vs_p = 0.5
+      # amount = 0.004
+      # out = np.copy(image)
+      # # Salt mode
+      # num_salt = np.ceil(amount * image.size * s_vs_p)
+      # coords = [np.random.randint(0, i - 1, int(num_salt))
+              # for i in image.shape]
+      # out[coords] = 1
+
+      # # Pepper mode
+      # num_pepper = np.ceil(amount* image.size * (1. - s_vs_p))
+      # coords = [np.random.randint(0, i - 1, int(num_pepper))
+              # for i in image.shape]
+      # out[coords] = 0
+      # return out
+   # elif noise_typ == "poisson":
+      # vals = len(np.unique(image))
+      # vals = 2 ** np.ceil(np.log2(vals))
+      # noisy = np.random.poisson(image * vals) / float(vals)
+      # return noisy
+   # elif noise_typ =="speckle":
+      # row,col,ch = image.shape
+      # gauss = np.random.randn(row,col,ch)
+      # gauss = gauss.reshape(row,col,ch)
+      # noisy = image + image * gauss
+      # return noisy
 
 class roibatchLoader(data.Dataset):
 
@@ -39,20 +107,20 @@ class roibatchLoader(data.Dataset):
         self.ratio_list_batch = torch.Tensor(self.data_size).zero_()
         num_batch = int(np.ceil(len(ratio_index) / batch_size))
         for i in range(num_batch):
-                left_idx = i*batch_size
-                right_idx = min((i+1)*batch_size-1, self.data_size-1)
+            left_idx = i*batch_size
+            right_idx = min((i+1)*batch_size-1, self.data_size-1)
 
-                if ratio_list[right_idx] < 1:
-                    # for ratio < 1, we preserve the leftmost in each batch.
-                    target_ratio = ratio_list[left_idx]
-                elif ratio_list[left_idx] > 1:
-                    # for ratio > 1, we preserve the rightmost in each batch.
-                    target_ratio = ratio_list[right_idx]
-                else:
-                    # for ratio cross 1, we make it to be 1.
-                    target_ratio = 1
+            if ratio_list[right_idx] < 1:
+                # for ratio < 1, we preserve the leftmost in each batch.
+                target_ratio = ratio_list[left_idx]
+            elif ratio_list[left_idx] > 1:
+                # for ratio > 1, we preserve the rightmost in each batch.
+                target_ratio = ratio_list[right_idx]
+            else:
+                # for ratio cross 1, we make it to be 1.
+                target_ratio = 1
 
-                self.ratio_list_batch[left_idx:(right_idx+1)] = target_ratio
+            self.ratio_list_batch[left_idx:(right_idx+1)] = target_ratio
 
     def __getitem__(self, index):  # noqa
         if self.training:
@@ -65,7 +133,73 @@ class roibatchLoader(data.Dataset):
         # sample in this group
         minibatch_db = [self._roidb[index_ratio]]
         blobs = get_minibatch(minibatch_db, self._num_classes)
-        data = torch.from_numpy(blobs['data'])
+        # print("type blobs data" + str(type(blobs['data'])))
+        # print("blobs data shape" + str(blobs['data'].shape))
+        # print("here" + str(type(data)))
+        # print("blobs data max: {}".format(blobs['data'].max()))
+        # print("blobs data min: {}".format(blobs['data'].min()))
+        # print("blobs data std: {}".format(blobs['data'].std()))
+
+        # noisy_data_imarray = blobs['data'] + \
+            # np.random.normal(0, 10, size=blobs['data'].shape)
+
+        image = blobs['data'][0]
+
+        if self.training:
+            # Backto RGB
+            image = image[:,:,::-1]
+
+            # imsave('/home/matteo/a1.png', image)
+
+            salt_color = image.min()
+            pepper_color = image.max()
+
+            # print("salt color: {}".format(salt_color))
+            # print("pepper color: {}".format(pepper_color))
+
+            # image2 = image * 0.9
+            # image3 = image * 1.1
+
+            # image2 = enhancer.enhance(0.9)
+            # image3 = enhancer.enhance(1.1)
+
+            # imsave('/home/matteo/a2.png', image2)
+            # imsave('/home/matteo/a3.png', image3)
+
+            NOISE_SP_AMOUNT = (0.0005, 0.001)
+
+            if np.random.random() < 0.5:
+            # Add salt and pepper effect
+                image = _apply_sp(
+                    image,
+                    np.random.uniform(*NOISE_SP_AMOUNT),
+                    point_size=2,
+                salt_color=salt_color,
+                pepper_color=pepper_color)
+
+            # print(image.shape)
+            # imsave('/home/matteo/a4.png', image)
+
+            # if np.random.random() < 0.5:
+
+                # data = noisy('s&p', blobs['data'])
+
+
+            # print("Shape: {}".format(blobs['data'][0].shape))
+            # print("Shape: {}".format(noisy_data_imarray.shape))
+
+            # imsave('/home/matteo/a1.png', blobs['data'][0])
+            # imsave('/home/matteo/a2.png', noisy_data_imarray[0])
+            # imsave('/home/matteo/a2.png', noisy_data_imarray)
+
+            # data = torch.from_numpy(blobs['data'])
+
+            # Backto BGR
+            image = image[:,:,::-1]
+
+        data = torch.from_numpy(image[np.newaxis, :, :, :].copy())
+
+        # 1/0
         im_info = torch.from_numpy(blobs['im_info'])
         # we need to random shuffle the bounding box.
         data_height, data_width = data.size(1), data.size(2)
@@ -222,6 +356,7 @@ class roibatchLoader(data.Dataset):
             if self.transform is not None:
                 padding_data = self.transform(padding_data)
 
+            # print("here2" + str(type(padding_data)))
             return padding_data, im_info, gt_boxes_padding, num_boxes
         else:
             data = data.permute(0, 3, 1, 2).contiguous().view(

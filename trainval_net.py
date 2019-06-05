@@ -217,7 +217,8 @@ if __name__ == '__main__':
 
     #torch.backends.cudnn.benchmark = True
     if torch.cuda.is_available() and not args.cuda:
-        print("WARNING: You have a CUDA device, so you should probably run with --cuda")
+        print("WARNING: You have a CUDA device, so you should "
+              "probably run with --cuda")
 
     # train set
     # -- Note: Use validation set and disable the flipped to enable faster loading.
