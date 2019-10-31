@@ -7,9 +7,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import _init_paths
+# import _init_paths
 import os
-import sys
+# import sys
 import numpy as np
 import argparse
 import pprint
@@ -19,9 +19,9 @@ import time
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
-import torch.optim as optim
+# import torch.optim as optim
 
-import torchvision.transforms as transforms
+# import torchvision.transforms as transforms
 from torch.utils.data.sampler import Sampler
 
 from roi_data_layer.roidb import combined_roidb
@@ -224,6 +224,7 @@ if __name__ == '__main__':
     # -- Note: Use validation set and disable the flipped to enable faster loading.
     # cfg.TRAIN.USE_FLIPPED = True
     cfg.USE_GPU_NMS = args.cuda
+
     imdb, roidb, ratio_list, ratio_index = combined_roidb(args.imdb_name)
     train_size = len(roidb)
 
@@ -364,19 +365,25 @@ if __name__ == '__main__':
             gt_boxes.data.resize_(data[2].size()).copy_(data[2])
             num_boxes.data.resize_(data[3].size()).copy_(data[3])
 
+            # Zero gradients?
             fasterRCNN.zero_grad()
+
+            # Forward pass
             rois, cls_prob, bbox_pred, \
             rpn_loss_cls, rpn_loss_box, \
             RCNN_loss_cls, RCNN_loss_bbox, \
             rois_label = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
 
+            # Compute loss
             loss = rpn_loss_cls.mean() + rpn_loss_box.mean() \
                      + RCNN_loss_cls.mean() + RCNN_loss_bbox.mean()
             loss_temp += loss.item()
 
-            # backward
+            # Backward pass
             optimizer.zero_grad()
+
             loss.backward()
+
             if args.net == "vgg16":
                     clip_gradient(fasterRCNN, 10.)
             optimizer.step()
