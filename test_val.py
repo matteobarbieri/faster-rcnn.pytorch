@@ -7,9 +7,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import _init_paths
+# import _init_paths
 import os
-import sys
+# import sys
 import numpy as np
 import argparse
 import pprint
@@ -19,19 +19,24 @@ import time
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
-import torch.optim as optim
+# import torch.optim as optim
 
-import torchvision.transforms as transforms
+# import torchvision.transforms as transforms
 from torch.utils.data.sampler import Sampler
 
 from roi_data_layer.roidb import combined_roidb
 from roi_data_layer.roibatchLoader import roibatchLoader
-from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
-from model.utils.net_utils import weights_normal_init, save_net, load_net, \
-            adjust_learning_rate, save_checkpoint, clip_gradient
+# from model.utils.config import (
+    # cfg, cfg_from_file, cfg_from_list, get_output_dir
+from model.utils.config import cfg, cfg_from_file, cfg_from_list
+# from model.utils.net_utils import weights_normal_init, save_net, load_net, \
+            # adjust_learning_rate, save_checkpoint, clip_gradient
+from model.utils.net_utils import (
+    adjust_learning_rate, save_checkpoint, clip_gradient)
 
 from model.faster_rcnn.vgg16 import vgg16
 from model.faster_rcnn.resnet import resnet
+
 
 def parse_args():
     """
@@ -157,7 +162,8 @@ class sampler(Sampler):
     def __len__(self):
         return self.num_data
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':  # noqa
 
     args = parse_args()
 
@@ -165,44 +171,59 @@ if __name__ == '__main__':
     print(args)
 
     if args.dataset == "pascal_voc":
-            args.imdb_name = "voc_2007_trainval"
-            args.imdbval_name = "voc_2007_test"
-            args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
+        args.imdb_name = "voc_2007_trainval"
+        args.imdbval_name = "voc_2007_test"
+        args.set_cfgs = [
+            'ANCHOR_SCALES', '[8, 16, 32]',
+            'ANCHOR_RATIOS', '[0.5,1,2]',
+            'MAX_NUM_GT_BOXES', '20']
     elif args.dataset == "pascal_voc_0712":
-            args.imdb_name = "voc_2007_trainval+voc_2012_trainval"
-            args.imdbval_name = "voc_2007_test"
-            args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
+        args.imdb_name = "voc_2007_trainval+voc_2012_trainval"
+        args.imdbval_name = "voc_2007_test"
+        args.set_cfgs = [
+            'ANCHOR_SCALES', '[8, 16, 32]',
+            'ANCHOR_RATIOS', '[0.5,1,2]',
+            'MAX_NUM_GT_BOXES', '20']
     elif args.dataset == "coco":
             args.imdb_name = "coco_2014_train+coco_2014_valminusminival"
             args.imdbval_name = "coco_2014_minival"
-            args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
-    # elif args.dataset == "abbdoc":
-    elif args.dataset in ["abbdoc", "siemenssimaris", "schneiderelectricecodial"]:
-            args.imdb_name = "{}_training".format(args.dataset)
-            args.imdbval_name = "{}_validation".format(args.dataset)
-
-            # array([[0.13691489],
-             # [0.66514403],
-             # [0.34580242],
-             # [1.18588261]])
             args.set_cfgs = [
-                            # 'ANCHOR_SCALES', '[4, 8, 16, 32]',
-                            'ANCHOR_SCALES', '[0.14, 0.35, 0.67, 1.19, 2.4]',
-                            'ANCHOR_RATIOS', '[0.5,1,2]',
-                            'MAX_NUM_GT_BOXES', '50',
-                            'DATA_DIR', '/mnt/data/datasets/synth_diagrams',
-                            'TRAIN.USE_FLIPPED', 'False'
-            ]
+                'ANCHOR_SCALES', '[4, 8, 16, 32]',
+                'ANCHOR_RATIOS', '[0.5,1,2]',
+                'MAX_NUM_GT_BOXES', '50']
+    # Code specific for ABB project
+    elif args.dataset in [
+            "abbdoc", "siemenssimaris", "schneiderelectricecodial"]:
+        args.imdb_name = "{}_training".format(args.dataset)
+        args.imdbval_name = "{}_validation".format(args.dataset)
+
+        args.set_cfgs = [
+            # 'ANCHOR_SCALES', '[4, 8, 16, 32]',
+            'ANCHOR_SCALES', '[0.14, 0.35, 0.67, 1.19, 2.4]',
+            'ANCHOR_RATIOS', '[0.5,1,2]',
+            'MAX_NUM_GT_BOXES', '50',
+            'DATA_DIR', '/mnt/data/datasets/synth_diagrams',
+            'TRAIN.USE_FLIPPED', 'False'
+        ]
     elif args.dataset == "imagenet":
-            args.imdb_name = "imagenet_train"
-            args.imdbval_name = "imagenet_val"
-            args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '30']
+        args.imdb_name = "imagenet_train"
+        args.imdbval_name = "imagenet_val"
+        args.set_cfgs = [
+            'ANCHOR_SCALES', '[4, 8, 16, 32]',
+            'ANCHOR_RATIOS', '[0.5,1,2]',
+            'MAX_NUM_GT_BOXES', '30']
     elif args.dataset == "vg":
-            # train sizes: train, smalltrain, minitrain
-            # train scale: ['150-50-20', '150-50-50', '500-150-80', '750-250-150', '1750-700-450', '1600-400-20']
-            args.imdb_name = "vg_150-50-50_minitrain"
-            args.imdbval_name = "vg_150-50-50_minival"
-            args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
+        # train sizes: train, smalltrain, minitrain
+        # train scale: [
+            # '150-50-20', '150-50-50',
+            # '500-150-80', '750-250-150',
+            # '1750-700-450', '1600-400-20']
+        args.imdb_name = "vg_150-50-50_minitrain"
+        args.imdbval_name = "vg_150-50-50_minival"
+        args.set_cfgs = [
+            'ANCHOR_SCALES', '[4, 8, 16, 32]',
+            'ANCHOR_RATIOS', '[0.5,1,2]',
+            'MAX_NUM_GT_BOXES', '50']
 
     args.cfg_file = "cfgs/{}_ls.yml".format(args.net) if args.large_scale else "cfgs/{}.yml".format(args.net)
 
@@ -215,9 +236,10 @@ if __name__ == '__main__':
     pprint.pprint(cfg)
     np.random.seed(cfg.RNG_SEED)
 
-    #torch.backends.cudnn.benchmark = True
+    # torch.backends.cudnn.benchmark = True
     if torch.cuda.is_available() and not args.cuda:
-        print("WARNING: You have a CUDA device, so you should probably run with --cuda")
+        print("WARNING: You have a CUDA device, so you should "
+              "probably run with --cuda")
 
     # train set
     # -- Note: Use validation set and disable the flipped to enable faster loading.
@@ -226,6 +248,7 @@ if __name__ == '__main__':
 
     imdb, roidb, ratio_list, ratio_index = combined_roidb(args.imdb_name)
     train_size = len(roidb)
+
     print('{:d} roidb entries (training)'.format(train_size))
 
     imdb_val, roidb_val, ratio_list_val, ratio_index_val = combined_roidb(
@@ -245,6 +268,10 @@ if __name__ == '__main__':
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
+    ##################################
+    ########### TRAINING #############  # noqa
+    ##################################
+
     # Create data loader for training
     sampler_batch = sampler(train_size, args.batch_size)
 
@@ -254,6 +281,10 @@ if __name__ == '__main__':
     dataloader = torch.utils.data.DataLoader(
         dataset, batch_size=args.batch_size,
         sampler=sampler_batch, num_workers=args.num_workers)
+
+    ##################################
+    ########## VALIDATION ############  # noqa
+    ##################################
 
     # Create data loader for validation
     sampler_batch_val = sampler(validation_size, args.batch_size)
@@ -390,20 +421,6 @@ if __name__ == '__main__':
             fasterRCNN.train()
 
             data = next(data_iter)
-            # print(type(data))
-            # print(data)
-            # print(len(data))
-            # print(data[0].size)
-            # print(data[0].shape)
-
-            # data_val_next = next(data_val_iter)
-            # print(data_val_next[0].shape)
-            # 1/0
-
-            # im_data.data.resize_(data[0].size()).copy_(data[0])
-            # im_info.data.resize_(data[1].size()).copy_(data[1])
-            # gt_boxes.data.resize_(data[2].size()).copy_(data[2])
-            # num_boxes.data.resize_(data[3].size()).copy_(data[3])
 
             im_data.resize_(data[0].size()).copy_(data[0])
             im_info.resize_(data[1].size()).copy_(data[1])
@@ -498,14 +515,15 @@ if __name__ == '__main__':
                     RCNN_loss_cls, RCNN_loss_bbox, \
                     rois_label = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
 
-                    ## Print debug
+                    # Print debug
                     # print(type(rpn_loss_cls))
                     # print(type(rpn_loss_box))
                     # print(type(RCNN_loss_cls))
                     # print(type(RCNN_loss_bbox))
 
-                    loss = rpn_loss_cls.mean() + rpn_loss_box.mean() \
-                            + RCNN_loss_cls.mean() + RCNN_loss_bbox.mean()
+                    loss = rpn_loss_cls.mean() + rpn_loss_box.mean() + \
+                        RCNN_loss_cls.mean() + RCNN_loss_bbox.mean()
+
                     loss_temp += loss.item()
 
                 if args.mGPUs:

@@ -14,8 +14,8 @@ DATASET=$1
 NET=res101
 
 #MAX_EPOCHS=10
-#MAX_EPOCHS=6
-MAX_EPOCHS=30
+MAX_EPOCHS=6
+#MAX_EPOCHS=30
 
 CHECKPOINT_INTERVAL=2000
 BS=5
@@ -29,6 +29,7 @@ if [ "$TFB_LOGS" = "" ]; then
 	TFB_LOGS=/tmp/logs/$DATASET/`date "+%Y%m%d_%H%M"`
 fi
 
+#python trainval_net.py \
 python test_val.py \
 	--dataset $DATASET \
 	--net $NET \
