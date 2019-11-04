@@ -4,7 +4,7 @@
 
 if [ "$1" = "-h" ]; then
 	echo -e "Usage:\n"
-	echo -e "/do_training.sh NOTATION SAVE_DIR"
+	echo -e "/do_trainval.sh NOTATION SAVE_DIR"
 	exit 0
 fi
 
