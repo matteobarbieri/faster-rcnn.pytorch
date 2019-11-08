@@ -105,9 +105,12 @@ def parse_args():
                         default=1, type=int)
 
     # resume trained model
-    parser.add_argument('--r', dest='resume',
-                        help='resume checkpoint or not',
-                        default=False, type=bool)
+    # parser.add_argument('--r', dest='resume',
+                        # help='resume checkpoint or not',
+                        # default=False, type=bool)
+    parser.add_argument('--resume', action='store_true',
+                        help='resume checkpoint or not')
+
     parser.add_argument('--checksession', dest='checksession',
                         help='checksession to load model',
                         default=1, type=int)
@@ -383,7 +386,9 @@ if __name__ == '__main__':  # noqa
         args.session = checkpoint['session']
         args.start_epoch = checkpoint['epoch']
         fasterRCNN.load_state_dict(checkpoint['model'])
+        fasterRCNN.cuda()
         optimizer.load_state_dict(checkpoint['optimizer'])
+        # print("Optimizer: {}".format(checkpoint['optimizer']))
         lr = optimizer.param_groups[0]['lr']
         if 'pooling_mode' in checkpoint.keys():
             cfg.POOLING_MODE = checkpoint['pooling_mode']
@@ -401,6 +406,9 @@ if __name__ == '__main__':  # noqa
         from tensorboardX import SummaryWriter
         # logger = SummaryWriter("logs")
         logger = SummaryWriter(args.tfb_logs)
+
+    # print("Start epoch: {}".format(args.start_epoch))
+    # print("Max epoch: {}".format(args.max_epochs + 1))
 
     for epoch in range(args.start_epoch, args.max_epochs + 1):
 
@@ -446,6 +454,9 @@ if __name__ == '__main__':  # noqa
             # backward
             optimizer.zero_grad()
             loss.backward()
+
+            # print(optimizer)
+            # print(loss)
 
             if args.net == "vgg16":
                     clip_gradient(fasterRCNN, 10.)
